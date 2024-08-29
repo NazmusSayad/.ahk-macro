@@ -5,9 +5,6 @@
 
 #Space::+!F
 
-Escape::Escape
-PrintScreen::#+S
-
 ::@me::me@sayad.dev
 ::@no::no-reply@sayad.dev
 ::@mail::247sayad@gmail.com
