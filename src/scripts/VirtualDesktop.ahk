@@ -1,5 +1,5 @@
 Initilized := false
-CapsLock:: {
+!CapsLock:: {
   global Initilized
   if (!Initilized) {
     Initilized := true
