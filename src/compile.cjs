@@ -1,0 +1,57 @@
+const fs = require('fs')
+const path = require('path')
+const { spawnSync } = require('child_process')
+
+const AHKOutDir = path.join(__dirname, '../bin')
+const AHKScripts = path.join(__dirname, './scripts')
+const AHK2ExeBin = path.join(__dirname, './bin/Ahk2Exe.exe')
+const AHKCompilerBin = path.join(__dirname, './bin/AutoHotkey64.exe')
+
+if (fs.existsSync(AHKOutDir))
+  fs.rmSync(AHKOutDir, { recursive: true, force: true })
+fs.mkdirSync(AHKOutDir)
+
+const compiledAhkScripts = fs
+  .readdirSync(AHKScripts)
+  .filter((file) => file.endsWith('.ahk'))
+  .map((file) => {
+    const inPath = path.join(AHKScripts, file)
+    const outPath = path.join(AHKOutDir, file.replace('.ahk', '.exe'))
+    const iconPath = path.join(AHKScripts, file.replace('.ahk', '.ico'))
+    const icoExists = fs.existsSync(iconPath)
+
+    const spawnArgs = [
+      '/base',
+      AHKCompilerBin,
+      '/in',
+      inPath,
+      '/out',
+      outPath,
+      icoExists && ['/icon', iconPath],
+    ]
+
+    spawnSync(AHK2ExeBin, spawnArgs.flat().filter(Boolean), {
+      stdio: 'inherit',
+      shell: true,
+    })
+
+    console.log(`Compiled: ${file}`)
+    return outPath
+  })
+
+const vbsScript = [
+  ['cmd.exe', '/c'],
+  ...compiledAhkScripts,
+  ['C:\\Program Files (x86)\\FastStone Capture\\FSCapture.exe', '-Silent'],
+].map((program) => {
+  const programScript = Array.isArray(program) ? program.join('"" ""') : program
+
+  return [
+    'Set WshShell = CreateObject("WScript.Shell")',
+    `WshShell.Run """${programScript}"""`,
+    'Set WshShell = Nothing',
+  ].join('\n')
+})
+
+fs.writeFileSync(path.join(AHKOutDir, 'Launch.vbs'), vbsScript.join('\n\n'))
+console.log('Compilation complete')

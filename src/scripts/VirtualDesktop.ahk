@@ -1,14 +1,14 @@
-CurrentDesktop := 1
 Initilized := false
-
 CapsLock:: {
-  global CurrentDesktop, Initilized
-  If (!Initilized) {
+  global Initilized
+  if (!Initilized) {
     Initilized := true
     Return Send("^#{Right}")
   }
 
+  global CurrentDesktop
   mapDesktopsFromRegistry()
+
   if (CurrentDesktop >= DesktopCount) {
     CurrentDesktop := 1
   } else {
@@ -66,28 +66,28 @@ getSessionId() {
   return SessionId
 }
 
-switchDesktopByNumber(targetDesktop) {
+switchDesktopByNumber(TargetDesktop) {
   global CurrentDesktop
   mapDesktopsFromRegistry()
 
-  if (targetDesktop > DesktopCount or targetDesktop < 1) {
-    OutputDebug("[invalid] target: " targetDesktop " current: " CurrentDesktop)
+  if (TargetDesktop > DesktopCount or TargetDesktop < 1) {
+    OutputDebug("[invalid] target: " TargetDesktop " current: " CurrentDesktop)
     return
   }
 
   SleepTime := 100
-  TargetDiff := targetDesktop - CurrentDesktop
+  TargetDiff := TargetDesktop - CurrentDesktop
   if (TargetDiff != 0) {
     SleepTime := Round(100 / Max(TargetDiff, TargetDiff * -1, 1))
   } 
 
-  while (CurrentDesktop < targetDesktop) {
+  while (CurrentDesktop < TargetDesktop) {
     Send("^#{Right}")
     Sleep(SleepTime)
     CurrentDesktop++
   }
 
-  while (CurrentDesktop > targetDesktop) {
+  while (CurrentDesktop > TargetDesktop) {
     Send("^#{Left}")
     Sleep(SleepTime)
     CurrentDesktop--
