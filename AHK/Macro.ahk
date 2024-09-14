@@ -1,8 +1,3 @@
-#Left::#^Left
-#Right::#^Right
-#^Left::#Left
-#^Right::#Right
-
 #Space::+!F
 
 ::@me::me@sayad.dev
