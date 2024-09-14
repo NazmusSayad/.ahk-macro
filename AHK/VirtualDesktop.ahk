@@ -68,11 +68,8 @@ getSessionId() {
 
 switchDesktopByNumber(targetDesktop) {
   global CurrentDesktop
-  if (CurrentDesktop == targetDesktop) {
-    return
-  }
-
   mapDesktopsFromRegistry()
+
   if (targetDesktop > DesktopCount or targetDesktop < 1) {
     OutputDebug("[invalid] target: " targetDesktop " current: " CurrentDesktop)
     return
@@ -81,7 +78,7 @@ switchDesktopByNumber(targetDesktop) {
   SleepTime := 100
   TargetDiff := targetDesktop - CurrentDesktop
   if (TargetDiff != 0) {
-    SleepTime := Round(100 / Max(TargetDiff, TargetDiff * -1))
+    SleepTime := Round(100 / Max(TargetDiff, TargetDiff * -1, 1))
   } 
 
   while (CurrentDesktop < targetDesktop) {
