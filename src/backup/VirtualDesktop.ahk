@@ -1,22 +1,21 @@
 Initilized := false
-#CapsLock::CapsLock
-*CapsLock::HandleAutoDesktopSwitch
-
-HandleAutoDesktopSwitch() { 
-  global Initilized, CurrentDesktop
-  If (!Initilized) {
+!CapsLock:: {
+  global Initilized
+  if (!Initilized) {
     Initilized := true
     Return Send("^#{Right}")
   }
 
+  global CurrentDesktop
   mapDesktopsFromRegistry()
-  If (CurrentDesktop >= DesktopCount) {
+
+  if (CurrentDesktop >= DesktopCount) {
     CurrentDesktop := 1
-  } Else {
+  } else {
     CurrentDesktop++
   }
 
-  switchDesktopByNumber(CurrentDesktop)
+  Return switchDesktopByNumber(CurrentDesktop)
 }
 
 mapDesktopsFromRegistry() {
@@ -25,26 +24,28 @@ mapDesktopsFromRegistry() {
 
   IdLength := 32
   SessionId := getSessionId()
-  If (SessionId) {
-    CurrentDesktopId := RegRead("HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\SessionInfo\" SessionId "\VirtualDesktops", "CurrentVirtualDesktop")
-    If (CurrentDesktopId) {
+  if (SessionId) {
+    CurrentDesktopId := RegRead("HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\SessionInfo\" SessionId "\VirtualDesktops",
+    "CurrentVirtualDesktop")
+    if (CurrentDesktopId) {
       IdLength := StrLen(CurrentDesktopId)
     }
   }
 
-  DesktopList := RegRead("HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VirtualDesktops", "VirtualDesktopIDs")
-  If (DesktopList) {
+  DesktopList := RegRead("HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VirtualDesktops",
+  "VirtualDesktopIDs")
+  if (DesktopList) {
     DesktopListLength := StrLen(DesktopList)
     DesktopCount := DesktopListLength / IdLength
   }
 
   i := 0
-  While (CurrentDesktopId And i < DesktopCount) {
+  while (CurrentDesktopId and i < DesktopCount) {
     StartPos := (i * IdLength) + 1
     DesktopIter := SubStr(DesktopList, StartPos, IdLength)
-    If (DesktopIter = CurrentDesktopId) {
+    if (DesktopIter = CurrentDesktopId) {
       CurrentDesktop := i + 1
-      Break
+      break
     }
     i++
   }
@@ -52,41 +53,41 @@ mapDesktopsFromRegistry() {
 
 getSessionId() {
   ProcessId := DllCall("GetCurrentProcessId", "UInt")
-  If (ProcessId = 0) {
+  if (ProcessId = 0) {
     OutputDebug("Error getting current process id.")
-    Return 0
+    return 0
   }
   SessionId := 0
   Result := DllCall("ProcessIdToSessionId", "UInt", ProcessId, "UInt*", &SessionId)
-  If (Result = 0) {
+  if (Result = 0) {
     OutputDebug("Error getting session id.")
-    Return 0
+    return 0
   }
-
-  Return SessionId
+  return SessionId
 }
 
 switchDesktopByNumber(TargetDesktop) {
   global CurrentDesktop
   mapDesktopsFromRegistry()
 
-  If (TargetDesktop > DesktopCount Or TargetDesktop < 1) {
-    Return OutputDebug("[invalid] target: " TargetDesktop " current: " CurrentDesktop)
+  if (TargetDesktop > DesktopCount or TargetDesktop < 1) {
+    OutputDebug("[invalid] target: " TargetDesktop " current: " CurrentDesktop)
+    return
   }
 
   SleepTime := 100
   TargetDiff := TargetDesktop - CurrentDesktop
-  If (TargetDiff != 0) {
+  if (TargetDiff != 0) {
     SleepTime := Round(100 / Max(TargetDiff, TargetDiff * -1, 1))
   } 
 
-  While (CurrentDesktop < TargetDesktop) {
+  while (CurrentDesktop < TargetDesktop) {
     Send "^#{Right}"
     Sleep(SleepTime)
     CurrentDesktop++
   }
 
-  While (CurrentDesktop > TargetDesktop) {
+  while (CurrentDesktop > TargetDesktop) {
     Send "^#{Left}"
     Sleep(SleepTime)
     CurrentDesktop--
