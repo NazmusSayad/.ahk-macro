@@ -1,5 +1,5 @@
 Set WshShell = CreateObject("WScript.Shell")
-WshShell.Run """cmd.exe"" ""/c""", 0
+WshShell.Run """cmd.exe"" ""/c"""
 Set WshShell = Nothing
 
 Set WshShell = CreateObject("WScript.Shell")
