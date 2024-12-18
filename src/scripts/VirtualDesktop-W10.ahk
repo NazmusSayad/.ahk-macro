@@ -1,6 +1,5 @@
 Initilized := false
-#CapsLock::CapsLock
-*CapsLock::HandleAutoDesktopSwitch
+F23::HandleAutoDesktopSwitch
 
 HandleAutoDesktopSwitch() { 
   global Initilized, CurrentDesktop
